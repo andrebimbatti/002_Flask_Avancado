@@ -1,32 +1,39 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
-
-class Jogo:
-    def __init__(self, nome, categoria, console):
-        self.nome=nome
-        self.categoria=categoria
-        self.console=console
-
-jogo1 = Jogo('Tetris', 'Puzzle', 'Atari')
-jogo2 = Jogo('God of War', 'Hack n Slash', 'PS2')
-jogo3 = Jogo('Mortal Kombat', 'Luta', 'PS2')
-lista = [jogo1, jogo2, jogo3]
-
-class Usuario:
-    def __init__(self, nome, nickname, senha):
-        self.nome = nome
-        self.nickname = nickname
-        self.senha = senha
-
-usuario1 = Usuario("Bruno Divino", "BD", "alohomora")
-usuario2 = Usuario("Camila Ferreira", "Mila", "paozinho")
-usuario3 = Usuario("Guilherme Louro", "Cake", "python_eh_vida")
-
-usuarios = { usuario1.nickname : usuario1,
-             usuario2.nickname : usuario2,
-             usuario3.nickname : usuario3 }
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
 app.secret_key = 'alura'
+
+try:
+    with open('extras\\pass.txt', 'r') as arquivo:
+        password = arquivo.read().strip()
+except:
+    print('Nao foi encontrado o arquivo \extras\pass.txt \n ou você não configurou a senha do banco de dados lá')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = \
+    '{SGBD}://{usuario}:{senha}@{servidor}/{database}'.format(
+        SGBD = 'mysql+mysqlconnector',
+        usuario = 'root',
+        senha = password,
+        servidor = 'localhost',
+        database = 'jogoteca'
+    )
+
+db = SQLAlchemy(app)
+
+class Jogos(db.Model):
+    id = db.Column(db.Integer, primary_key = True, autoincrement = True)
+    nome = db.Column(db.String(50), nullable = False)
+    categoria = db.Column(db.String(40), nullable = False)
+    console = db.Column(db.String(20), nullable = False)
+    
+class Usuarios(db.Model):
+    nickname = db.Column(db.String(8), primary_key = True)
+    nome = db.Column(db.String(20), nullable = False)
+    senha = db.Column(db.String(100), nullable = False)
+
+
 
 @app.route('/')
 def index():
