@@ -1,22 +1,26 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
-import os
+import urllib.parse
 
 app = Flask(__name__)
 app.secret_key = 'alura'
 
 try:
-    with open('extras\\pass.txt', 'r') as arquivo:
-        password = arquivo.read().strip()
-except:
-    print('Nao foi encontrado o arquivo \extras\pass.txt \n ou você não configurou a senha do banco de dados lá')
+    with open('.\\extras\\pass.txt', 'r') as arquivo:
+        password = str(arquivo.read().strip())
+        print(password)
+except Exception as e:
+    print('Erro ao ler a senha')
+
+pass_enc = urllib.parse.quote_plus(password)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = \
-    '{SGBD}://{usuario}:{senha}@{servidor}/{database}'.format(
-        SGBD = 'mysql+mysqlconnector',
+    '{SGBD}://{usuario}:{senha}@{servidor}:{porta}/{database}'.format(
+        SGBD = 'mysql+pymysql',
         usuario = 'root',
-        senha = password,
-        servidor = 'localhost',
+        senha = pass_enc,
+        servidor = '127.0.0.1',
+        porta = '3306',
         database = 'jogoteca'
     )
 
@@ -27,16 +31,22 @@ class Jogos(db.Model):
     nome = db.Column(db.String(50), nullable = False)
     categoria = db.Column(db.String(40), nullable = False)
     console = db.Column(db.String(20), nullable = False)
+
+    def __repr__(self):
+        return  '<Name %r>' % self.name
     
 class Usuarios(db.Model):
     nickname = db.Column(db.String(8), primary_key = True)
     nome = db.Column(db.String(20), nullable = False)
     senha = db.Column(db.String(100), nullable = False)
 
+    def __repr__(self):
+        return  '<Name %r>' % self.name
 
 
 @app.route('/')
 def index():
+    lista = Jogos.query.order_by(Jogos.id)
     return render_template('lista.html', titulo='Jogos', jogos=lista)
 
 @app.route('/novo')
@@ -50,8 +60,17 @@ def criar():
     nome = request.form['nome']
     categoria = request.form['categoria']
     console = request.form['console']
-    jogo = Jogo(nome, categoria, console)
-    lista.append(jogo)
+
+    jogo = Jogos.query.filter_by(nome=nome).first()
+
+    if jogo:
+        flash('O jogo digitado já existe no nosso banco de dados!')
+        return redirect(url_for('index'))
+    
+    novo_jogo = Jogos(nome=nome, categoria=categoria, console=console)
+    db.session.add(novo_jogo) #adiciona um novo jogo ao banco de dados
+    db.session.commit() #Salva a adição no bd
+    
     return redirect(url_for('index'))
 
 @app.route('/login')
@@ -61,8 +80,8 @@ def login():
 
 @app.route('/autenticar', methods=['POST',])
 def autenticar():
-    if request.form['usuario'] in usuarios:
-        usuario = usuarios[request.form['usuario']]
+    usuario = Usuarios.query.filter_by(nickname=request.form['usuario']).first()
+    if usuario:
         if request.form['senha'] == usuario.senha:
             session['usuario_logado'] = usuario.nickname
             flash(usuario.nickname + ' logado com sucesso!')
