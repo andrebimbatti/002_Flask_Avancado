@@ -1,11 +1,11 @@
 import urllib.parse
+import os
 
 SECRET_KEY = 'alura'
 
 try:
     with open('.\\extras\\pass.txt', 'r') as arquivo:
         password = str(arquivo.read().strip())
-        print(password)
 except Exception as e:
     print('Erro ao ler a senha')
 
@@ -20,3 +20,5 @@ SQLALCHEMY_DATABASE_URI = \
         porta = '3306',
         database = 'jogoteca'
     )
+
+UPLOAD_PATH = os.path.dirname(os.path.abspath(__file__)) + '/uploads'
