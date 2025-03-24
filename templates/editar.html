@@ -14,7 +14,7 @@
 
         <fieldset>
           <input type="hidden" name="id" value="{{ id }}">
-          {{ form.csrf+token() }}
+          {{ form.csrf_token() }}
           <div class="form-group">
             {{ form.nome.label(class='form-label')}}
             {{ form.nome(class="form-control") }}
