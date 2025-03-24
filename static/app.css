@@ -70,7 +70,7 @@ td {
 .menu {
     list-style: none;
     display: flex;
-    justify-content: center;
+    justify-content: start;
     gap: 1em;
 
 }
