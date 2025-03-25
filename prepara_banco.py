@@ -1,8 +1,16 @@
 import mysql.connector
 from mysql.connector import errorcode
 from flask_bcrypt import generate_password_hash
+from pathlib import Path
 
 senha = input('Digite a senha do Banco de Dados \n')
+
+caminho_arquivo = Path("extras/pass.txt")
+
+caminho_arquivo.parent.mkdir(parents=True, exist_ok=True)
+
+with caminho_arquivo.open("w") as file:
+    file.write(f"{senha}")
 
 print("Conectando...")
 try:
