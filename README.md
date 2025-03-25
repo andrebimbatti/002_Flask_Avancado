@@ -32,8 +32,7 @@ Siga os passos abaixo para rodar o projeto localmente:
   
 2. **Crie e ative um ambiente virtual**:
     ```bash
-      
-    python -m venv venv
+      python -m venv venv
 
 - 2.1 Ativando no Linux/Mac:
     ```bash
