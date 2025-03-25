@@ -1,6 +1,5 @@
 import os
 from jogoteca import app
-from markupsafe import Markup
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, validators, SubmitField
 
@@ -17,9 +16,9 @@ class FormularioUsuario(FlaskForm):
 
 
 def recupera_imagem(id):
-    for arquivo in os.listdir(app.config['UPLOAD_PATH']):
-        if f'capa{id}' in arquivo:
-            return arquivo
+    for nome_arquivo in os.listdir(app.config['UPLOAD_PATH']):
+        if f'capa{id}' in nome_arquivo:
+            return nome_arquivo
         
     return 'capa_padrao.jpg'
 
